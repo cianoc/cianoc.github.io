@@ -2,6 +2,43 @@
 This post assumes that you have some experience with CommonMusic. 
 If you don't, that's fine, I'll introduce in a later post how to install and run it.
 
+## Starting Common Music Notation
+
+```common-music
+(ql:quickload :incudine)
+
+(ql:quickload :cm-incudine) ;; this order is important, as this allows cm-incudine to check midi setup.
+
+(in-package :cm) ;; we will be working within the cm package to do things.
+                 ;; not great style these days, but it's old
+```
+
+This will setup start cm-incudine with the default MIDI input and output ports. To see what it is using if you're using portmidi:
+
+```common-music
+(pm-input-stream)
+
+(pm-output-stream)
+```
+
+Currently it only allows you to use the standard input stream, but this will be changed soon...
+
+*** Setting up OSC
+
+```common-lisp
+(osc-open-default :host "127.0.0.1" :port 3003 :direction :output)
+
+(osc-open-default :host "127.0.0.1" :port 3004 :direction :input)
+
+; and an example of using this.
+
+(sprout
+ (process
+   repeat 2
+   output (new osc :time (now) :types "iiii" :message '(1 2 3 4))
+   wait 1))
+```
+
 ## Note Names & Music Notation
 ### Notes
 Note names are the symbols a-g (e.g. ```'c```)
@@ -280,6 +317,13 @@ You can also set a hook once this is generated using `(set-output-midi-hook!)`, 
 
 ### OSC
 *TODO*
+```common-lisp
+(sprout
+ (process
+   repeat 2
+   output (new osc :time (now) :types "iiii" :message '(1 2 3 4))
+   wait 1))
+```
 
 ### Incudine
 *TODO*
