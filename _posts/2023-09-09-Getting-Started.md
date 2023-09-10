@@ -190,3 +190,96 @@ amplitude supports the following optional arguments:
 (amplitude .5 0 1 4)
 ⇒ 0.0625
 ```
+
+## Outputting Music
+Common Music uses objects for the different types of music output (e.g. midi, or music notation). In this section I describe the different types.
+
+*Note:* Common Music uses objects for most types of musical event, and to make things easier it adds the macro `new` as this reduces boiler plate. There is of course no reason you need to use `new`, but it does reduce line noise.
+
+### MIDI 
+This section will just describe notes and CC messages. All other event types are possible (including stuff defined in the MIDI file standard) and you should consult the dictionary for these.
+
+#### Midi Notes
+Generally you create a MIDI note event with 
+```common-lisp
+(new midi &keys time channel keynum duration amplitude)
+```
+
+This is just a standard Common Lisp object, but CM added the convenience macr
+
+This will generate the note on and off events. If for some reason you need to generate just one of those, then this also possible (see the ditionary for details).
+
+Keys are as follows:
+- ```:time number``` The start time of the object.
+- ```:channel integer``` A MIDI channel number. The default value is 0.
+- ```:keynum {keynum | note}``` A MIDI key number or note name in the standard chromatic scale. Floating point key numbers are rounded to their closest integer key number unless channel tuning is enabled in the destination midi stream. If the value is less than zero or the symbol r (rest) then the event will not be output to the destination.
+- ```:duration number``` The duration of the note.
+- ```:amplitude number``` A floating-point logical amplitude 0.0-1.0, or an integer velocity 0-127. If the value is zero then the event will not be output to the destination. The default value is 64.
+
+#### Midi CC Events
+```common-lisp
+(new midi-control-change &keys time channel controller value)
+```
+
+Keys are as follows:
+- ```:time number``` - The start time of the object.
+- ```:channel integer``` - A MIDI channel number. The default value is 0.
+- ```:controller integer``` - A MIDI controller value 0-127.
+- ```:value integer``` - A MIDI control value 0-127.
+
+#### Real-Time MIDI output
+Real time MIDI output requires incudine to be installed and running. (see opening section for more details).
+
+Once you have started `cm-incudine`, then `output` `event` and `sprout` can be used to send MIDI events to the real time MIDI scheduler:
+
+```common-lisp
+(output (new midi)) ;; you should hear a note on your synthesizer if this is setup correctly
+
+(sprout
+ (loop for x below 10
+    collect (new midi :time (* x 0.5) :keynum (between 60 71))))
+
+;; Note that here we had to use *rts-out* to tell it where to send these events as we're collecting them.
+(events
+ (loop for x below 10
+    collect (new midi :time (* x 0.5) :keynum (between 60 71)))
+ *rts-out*)
+
+;; here we're using process, but we still have to use *rts-out* as we need to tell it what to do witht the output
+(events
+ (process
+   repeat 5
+   output (new midi :time (now) :keynum (between 60 71))
+   wait 0.5)
+ *rts-out*)
+
+;; But here we use sprout, and we don't need to worry
+(sprout
+ (process
+   repeat 5
+   output (new midi :time (now) :keynum (between 60 71))
+   wait 0.5))
+```
+
+#### Generating a MIDI file
+To generate a MIDI file, use events and a filename with the extension `.mid`. You can make sure it goes to the right directory by using `pwd` to check the current directory, and by using `cd` to change directories:
+
+```common-lisp
+(cd "~/Music/Composition") ;; You may have to modify this on windows.
+
+(events (new midi :time 0
+:keynum 60 :duration 2) "temp.mid") ;; you can also use a full filename if you prefer
+```
+
+This should generate a midi file in the correct format. See the dictionary for the full array of possibilities.
+
+You can also set a hook once this is generated using `(set-output-midi-hook!)`, though given real-time output will work just fine, not sure there's much benefit to this.
+
+### Musical Notation
+*Work in Progress*. This uses fomus. I have not tried this yet, but it requires using different event types. You can also do it using common music notation, but not currently clear to me if there is a working version of that around.
+
+### OSC
+*TODO*
+
+### Incudine
+*TODO*
