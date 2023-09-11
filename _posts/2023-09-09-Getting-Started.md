@@ -228,10 +228,96 @@ amplitude supports the following optional arguments:
 ⇒ 0.0625
 ```
 
+## Music Containers
+The main music contains in CM are:
+- Event - a single event
+- Event-stream - A score (e.g. a midi file). See output for more details
+
+### Event
+A single event which will be created using an object which is a subclass of TODO.
+
+Examples include: midi, TODO
+
+```common-lisp
+(new midi :keynum 60 :duration 0.5 :amplitude 0.5 :channel 0)
+```
+
+### Sequence
+An object that contains a list of time sorted sub objects. These can be events, processes and other sequences
+
+seq supports the following slot initializations:
+- `:name {symbol | string}` - An optional name for the object. If specified, the object can be retrieved from its name using the read macro #& or the find-object function.
+- `:subobjects list` - A list of time ordered subobjects, typically muscial events or other seq objects.
+- `:time number` - An optional start time of the seq.
+
+Examples:
+```common-lisp
+(new seq :name 'test
+         :subobjects (loop for i below 10
+                           collect (new midi :time i)))
+```
+
+### Process
+A process is a Common Music function that computes musical structure (sound events, sequences, even
+other processes) dynamically as it is repeated called by events function when it is generating a score/output.
+
+Processes execute in such a way that many different processes may run in parallel, at the same time. 
+These “parallel” processes are all managed by a controlling unit called the scheduler.
+
+A process function is created using the process macro function, and looks identical to a loop definition. The main
+difference is that its action clauses implement scheduling and score actions, rather than looping actions.
+
+The major difference between loop and process is that the process macro returns a function to evaluate
+inside the scheduler.
+
+An example of a process:
+```common-lisp
+(define (strum key1 key2 rate dur amp)
+    (let ((step (if (< key2 key1) -1 1))
+          (diff (abs (- key2 key1))))
+      (process repeat (+ diff 1)
+        for key from key1 by step
+        for beg = (now)
+        output (new midi :time beg
+                 :duration dur
+                 :amplitude amp
+                 :keynum key)
+        wait rate)))
+
+;; generating a score with this
+(events (strum 48 60 .1 1 .4) "strum.mid")
+```
+
+Important things to note in the above function:
+- `process` appears in place of `loop`.
+- An `output` action appears in place of the `collect` action.
+- `now` returns the elapsed time since this process first started running.
+- `wait` causes this process to wait for the value of 'rate' seconds before getting the next value from this function.
+
 ## Outputting Music
 Common Music uses objects for the different types of music output (e.g. midi, or music notation). In this section I describe the different types.
 
 *Note:* Common Music uses objects for most types of musical event, and to make things easier it adds the macro `new` as this reduces boiler plate. There is of course no reason you need to use `new`, but it does reduce line noise.
+
+Events are written out using the `events` function
+
+```common-lisp
+(defun events (objects destination [ahead] {keyword value}*))
+```
+
+This writes events to a destination (e.g. realtime MIDI output, or a lillypond notation file). These events come from either a single object (an event, seq or process), or a list of objects (a list of events, list of sequences, or list of processes).
+
+The destination can be a file (and it will automatically infer the correct format), a port (e.g. MIDI output), sequence (TODO), or plotter window (TODO). 
+
+Aahead is optional, and it determines the start time offset for objects added to destination. If it is a number then this is a pplied to all ojects. If it is a list of numbers, then each number in the list is matched with its corresponding object in objects.
+
+The keywords are spcific to the output destination, and can include post-processing hooks, or values relevant to the particular format.
+
+Some examples:
+```common-lisp
+(events (new midi :time 0) "test.midi")
+⇒ "test.mid"
+```
 
 ### MIDI 
 This section will just describe notes and CC messages. All other event types are possible (including stuff defined in the MIDI file standard) and you should consult the dictionary for these.
@@ -311,6 +397,26 @@ To generate a MIDI file, use events and a filename with the extension `.mid`. Yo
 This should generate a midi file in the correct format. See the dictionary for the full array of possibilities.
 
 You can also set a hook once this is generated using `(set-output-midi-hook!)`, though given real-time output will work just fine, not sure there's much benefit to this.
+
+In addition midi-file-stream files support the following keys (e.g. these can be used in events when generating a midi file):
+- `:versions {number | true}` - Causes a new version of the file to be created each time output occurs.
+The version name is based on the name of the file and the version count,
+which is initialized to number and incremented each time output occurs. A
+true value for versions is the same as 1.
+- `:tempo number` - The MIDI tempo of the file. Defaults to 60 bpm.
+- `:divisions integer` - The number of MIDI divisions per quarter note. Defaults to 96.
+- `:timesig (numerator denominator)` - The time signature for the file. Defaults to (4 4). The time signature list
+may contain up to four values: (numerator denominator clocks-per-quarter
+32nds).
+- `:channel-tuning {false | true | 1-16 | list}` - The default value of :channel-tuning is false, which means that floating
+point key numbers are rounded to the nearest MIDI integer keynum as
+they are sent to a MIDI file or port. See Chapter 15 and consult the
+Common Music Dictionary for more information on :channel-tuning.
+- `:pitch-bend-width integer` - Declares the pitch bend width in semitones of the synthesizer. This value
+is used to calculate pitch bend values for microtonal frequency resolution.
+The default value is 2, which means that the synthesizer uses a maximum
+pitch bend range of one whole step up and down.
+
 
 ### Musical Notation
 *Work in Progress*. This uses fomus. I have not tried this yet, but it requires using different event types. You can also do it using common music notation, but not currently clear to me if there is a working version of that around.
