@@ -109,9 +109,9 @@ See the dictionary for exact numbers if curious.
 You can also work in values between ```0.0``` and ```1.0``` where these map to ```pppp``` and ```ffff``` respectively.
 
 These values by default increase linearly, which is probably not what you want. You can adjust how these map using:
-- ```\*loudest\*``` 
-- ```\*softest\*```
-- ```\*power\*```
+- ```*loudest*``` 
+- ```*softest*```
+- ```*power*```
 
 loudest and softest do what you expect. Power adjusts the power curve. The default value is 1.0. which means that amplitude 
 values increase linearly. Whether this matters depends upon what you're trying to do.
@@ -146,11 +146,11 @@ for the Hertz value 50 cents above Middle C, or 269.291 Hz.
 
 keynum supports the following keyword arguments:
 
-- **:hz boolean** - If true then a numerical freq is interpreted as a Hertz value rather than as a key number.
-- **:from { tuning | mode}** - The tuning or mode to return the key number from. The default value is *scale*. If mode is specified then freq is a modal key number and the value returned is the equivalent key number in the mode's tuning. if tuning is specified then freq is an integer key number and the value returned is the corresponding, possibly floating point, key number in the standard chromatic scale.
-- **:in? { tuning | mode}** - Tests if freq references a key number in tuning or mode. Returns the key number or false.
-- **:to mode** - Forces freq to the closet key number in mode.
-- **:through { tuning | mode}** - Filters freq through tuning or mode and returns the closest integer tuning keynum.
+- ```:hz boolean``` - If true then a numerical freq is interpreted as a Hertz value rather than as a key number.
+- ```:from { tuning | mode}``` - The tuning or mode to return the key number from. The default value is *scale*. If mode is specified then freq is a modal key number and the value returned is the equivalent key number in the mode's tuning. if tuning is specified then freq is an integer key number and the value returned is the corresponding, possibly floating point, key number in the standard chromatic scale.
+- ```:in? { tuning | mode}``` - Tests if freq references a key number in tuning or mode. Returns the key number or false.
+- ```:to mode``` - Forces freq to the closet key number in mode.
+- ```:through { tuning | mode}``` - Filters freq through tuning or mode and returns the closest integer tuning keynum.
 
 ### note
 ```common-lisp
@@ -161,10 +161,10 @@ Returns the note name of freq, which can be a note name, key number, Hertz value
 
 note supports the following keyword arguments:
 
-- **:hz boolean** - If true then a numerical freq is interpreted as a Hertz value rather than as a key number.
-- **:in { tuning | mode}** - The tuning or mode to return the note from. The default value is *scale*. If a mode is specified then freq must be a modal key number.
-- **:in? { tuning | mode}** - Tests if freq references a note name in the specified tuning or mode. Returns the note name or false.
-- **:through mode** - Filters freq through mode and returns the closest note.
+- ```:hz boolean``` - If true then a numerical freq is interpreted as a Hertz value rather than as a key number.
+- ```:in { tuning | mode}``` - The tuning or mode to return the note from. The default value is *scale*. If a mode is specified then freq must be a modal key number.
+- ```:in? { tuning | mode}``` - Tests if freq references a note name in the specified tuning or mode. Returns the note name or false.
+- ```:through mode``` - Filters freq through mode and returns the closest note.
 
 ### transpose
 ```common-lisp
