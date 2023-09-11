@@ -130,9 +130,9 @@ Returns the hertz value of freq, which can be a notename (as a symbol), key numb
 or a list of any of the above.
 
 ```hertz``` supports the following keyword arguments:
-- **:hz boolean** - If true then a numerical freq is interpreted as a Hertz value rather than as a key number.
-- **:in tuning** - The tuning to return the Hertz value from. The default value is \*scale\*.
-- **:through { tuning | mode}** Filters freq through tuning or mode and returns the Hertz value of the closest Hertz values.
+- ```:hz boolean``` - If true then a numerical freq is interpreted as a Hertz value rather than as a key number.
+- ```:in tuning``` - The tuning to return the Hertz value from. The default value is \*scale\*.
+- ```:through { tuning | mode}``` Filters freq through tuning or mode and returns the Hertz value of the closest Hertz values.
 
 ### keynum
 ```common-lisp
