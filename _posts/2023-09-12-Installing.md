@@ -35,7 +35,7 @@ You can find online copies of Notes from the MetaLevel if you look for it. All o
 ## Installing Supporting Libraries
 Assuming you've got Common Lisp up and running, we'll now look at getting the supporting libraries setup for Common Music.
 
-    In order to install Incudine you will need:
+In order to install Incudine you will need:
 - JACK or PortAudio >= 1.9
 - PortMidi
 - libsndfile >= 1.0.19
